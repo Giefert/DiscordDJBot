@@ -237,6 +237,8 @@ async function handlePlayCommand(message, args) {
         console.log('🎵 Creating song object...');
         console.log(`🔗 Final songUrl before song creation: "${songUrl}"`);
         console.log(`🔗 songUrl type: ${typeof songUrl}`);
+        console.log('🔍 Video info returned:', songInfo.video_details.title);
+        console.log('🔍 Video URL being used:', songUrl);
 
         const song = {
             title: songInfo.video_details.title,
@@ -381,25 +383,27 @@ async function playNextSong(queue, message) {
 
             queue.player.on(AudioPlayerStatus.Playing, () => {
                 console.log('▶️ Audio player started PLAYING');
+                console.log('🔍 Current song in queue:', queue.songs[0]?.title);
+                console.log('🔍 Queue length:', queue.songs.length);
                 queue.isPlaying = true;
                 const embed = {
                     color: 0x00ff00,
                     title: '▶️ Now Playing',
-                    description: `**[${song.title}](${song.url})**`,
+                    description: `**[${queue.songs[0].title}](${queue.songs[0].url})**`,
                     fields: [
                         {
                             name: 'Duration',
-                            value: formatDuration(song.duration),
+                            value: formatDuration(queue.songs[0].duration),
                             inline: true
                         },
                         {
                             name: 'Requested by',
-                            value: song.requester.username,
+                            value: queue.songs[0].requester.username,
                             inline: true
                         }
                     ],
                     thumbnail: {
-                        url: song.thumbnail
+                        url: queue.songs[0].thumbnail
                     },
                     timestamp: new Date()
                 };
