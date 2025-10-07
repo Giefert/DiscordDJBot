@@ -350,13 +350,30 @@ async function playNextSong(queue, message) {
             throw new Error(`yt-dlp binary not found at: ${ytdlpBinary}`);
         }
 
-        const ytdlpProcess = spawn(ytdlpBinary, [
+        // Prepare yt-dlp arguments with better headers and authentication
+        const ytdlpArgs = [
             '--output', '-',
-            '--format', 'bestaudio',
+            '--format', 'ba[ext=webm]/ba[ext=m4a]/ba/worst',
             '--quiet',
+            '--no-warnings',
             '--no-playlist',
+            '--extractor-args', 'youtube:player_client=android,web',
+            '--user-agent', 'com.google.android.youtube/19.09.37 (Linux; U; Android 11) gzip',
+            '--referer', 'https://www.youtube.com/',
             song.url
-        ], {
+        ];
+
+        // Add cookies if available
+        const cookieFiles = ['/Users/one/Desktop/cookies.firefox-private.txt', './cookies.txt'];
+        for (const cookieFile of cookieFiles) {
+            if (fs.existsSync(cookieFile)) {
+                console.log(`🍪 Using cookies from: ${cookieFile}`);
+                ytdlpArgs.splice(-1, 0, '--cookies', cookieFile);
+                break;
+            }
+        }
+
+        const ytdlpProcess = spawn('/opt/homebrew/bin/python3.12', [ytdlpBinary, ...ytdlpArgs], {
             stdio: ['ignore', 'pipe', 'pipe']
         });
 
